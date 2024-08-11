@@ -8,13 +8,14 @@ def text_to_image(input_file, output_folder, font_path=None, font_size=12, image
     if font_path:
         font = ImageFont.truetype(font_path, font_size)
     else:
-        font = ImageFont.load_default()
+        font = ImageFont.load_default()  # Use default bitmap font
 
-    paragraphs = text.split('\n')
+    paragraphs = text.split('\n')  # Split text into paragraphs based on newline characters
 
     images = []
     current_image = Image.new('RGB', image_size, color='white')
     draw = ImageDraw.Draw(current_image)
+    draw.fontmode = "1"
     y_text = 0
     page_number = 1
 
@@ -34,12 +35,14 @@ def text_to_image(input_file, output_folder, font_path=None, font_size=12, image
             else:
                 bbox = draw.textbbox((0, 0), line, font=font)
                 _, _, _, height = bbox
-                if y_text + height > image_size[1] - height:
+                if y_text + height > image_size[1] - height:  # Reserve space for footer
+                    # Add footer with page number and progress
                     footer_text = f'Page {page_number} of {page_number} - {int((lines_processed / total_lines) * 100)}%'
                     draw.text((0, image_size[1] - height), footer_text, font=font, fill='black')
                     images.append(current_image)
                     current_image = Image.new('RGB', image_size, color='white')
                     draw = ImageDraw.Draw(current_image)
+                    draw.fontmode = "1"
                     y_text = 0
                     page_number += 1
 
@@ -51,12 +54,14 @@ def text_to_image(input_file, output_folder, font_path=None, font_size=12, image
         if line:
             bbox = draw.textbbox((0, 0), line, font=font)
             _, _, _, height = bbox
-            if y_text + height > image_size[1] - height:
+            if y_text + height > image_size[1] - height:  # Reserve space for footer
+                # Add footer with page number and progress
                 footer_text = f'Page {page_number} of {page_number} - {int((lines_processed / total_lines) * 100)}%'
                 draw.text((0, image_size[1] - height), footer_text, font=font, fill='black')
                 images.append(current_image)
                 current_image = Image.new('RGB', image_size, color='white')
                 draw = ImageDraw.Draw(current_image)
+                draw.fontmode = "1"
                 y_text = 0
                 page_number += 1
 
@@ -64,8 +69,9 @@ def text_to_image(input_file, output_folder, font_path=None, font_size=12, image
             y_text += height
             lines_processed += len(line)
 
-        y_text += paragraph_spacing
+        y_text += paragraph_spacing  # Add custom space after each paragraph
 
+    # Add footer to the last page
     footer_text = f'Page {page_number} of {page_number} - {int((lines_processed / total_lines) * 100)}%'
     draw.text((0, image_size[1] - height), footer_text, font=font, fill='black')
     images.append(current_image)
@@ -74,4 +80,5 @@ def text_to_image(input_file, output_folder, font_path=None, font_size=12, image
         output_path = os.path.join(output_folder, f'page_{i+1}.bmp')
         img.save(output_path)
         print(f'Saved: {output_path}')  # Debugging line
-text_to_image('input.txt', 'output_folder', 'simsun.ttc', paragraph_spacing=0)
+
+text_to_image('yb.txt', 'output_folder', 'simsun.ttc', paragraph_spacing=0)
